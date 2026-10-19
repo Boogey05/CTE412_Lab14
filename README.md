@@ -165,6 +165,3 @@ docker rmi notice-board:02230132-1.0.0 notice-board:02230132-1.1.0 notice-board:
 * Captured command output is in `evidence/`, named `tN-<description>.txt`.
 * The assessed report is `report/p06-report.md`.
 
-## 9. Repository
-
-https://github.com/Boogey05/CTE412_Lab14.git
