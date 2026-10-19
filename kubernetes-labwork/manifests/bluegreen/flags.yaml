@@ -1,0 +1,9 @@
+# Purpose: feature flag controlling pinned-notice ordering; consumed by green as env
+# Apply: kubectl apply -f manifests/bluegreen/flags.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: notice-board-flags
+  namespace: nb-02230132
+data:
+  FEATURE_PINNED: "false" # start false, flip to "true" for the experiment

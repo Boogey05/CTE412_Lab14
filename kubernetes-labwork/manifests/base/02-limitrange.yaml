@@ -1,0 +1,16 @@
+# Purpose: default requests/limits so a container without explicit resources is not rejected
+# Apply: kubectl apply -f manifests/base/02-limitrange.yaml
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: nb-defaults
+  namespace: nb-02230132
+spec:
+  limits:
+    - type: Container
+      default:
+        cpu: 200m # <= limits.cpu ceiling; 6 pods × 200m = 1.2 < 2
+        memory: 256Mi # 6 pods × 256Mi = 1.5Gi < 2Gi ceiling
+      defaultRequest:
+        cpu: 100m # 6 pods × 100m = 600m < requests.cpu=1
+        memory: 128Mi # 6 pods × 128Mi = 768Mi < 1Gi

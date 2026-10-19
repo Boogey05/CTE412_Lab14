@@ -1,0 +1,11 @@
+# Purpose: namespace nb-02230132 with required labels and full-name annotation
+# Apply: kubectl apply -f manifests/base/00-namespace.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: nb-02230132
+  labels:
+    app.kubernetes.io/part-of: campus-notice-board # required by brief
+    cte412/practical: "06" # required by brief (string)
+  annotations:
+    student.fullname: "Kinley Phuntsho" # required by brief

@@ -1,0 +1,37 @@
+# Purpose: deliberately broken 02230132-1.2.0 release — /healthz never returns 200
+# Apply: kubectl apply -f manifests/rolling/deployment-broken.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notice-board
+  annotations:
+    kubernetes.io/change-cause: "broken release 02230132-1.2.0"
+spec:
+  replicas: 3
+  progressDeadlineSeconds: 60 # declare the rollout failed after 60 s without progress
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0 # keep all old pods serving while the new ones never become Ready
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: notice-board
+  template:
+    metadata:
+      labels:
+        app: notice-board
+        version: "02230132-1.2.0"
+    spec:
+      containers:
+        - name: api
+          image: notice-board:02230132-1.2.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 2
+            periodSeconds: 2

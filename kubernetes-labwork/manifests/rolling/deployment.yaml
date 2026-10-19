@@ -1,0 +1,45 @@
+# Purpose: baseline notice-board 1.0.0 Deployment — 3 replicas, readiness on /healthz
+# Apply: kubectl apply -f manifests/rolling/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notice-board
+  namespace: nb-02230132
+  annotations:
+    kubernetes.io/change-cause: "initial release 02230132-1.0.0"
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: notice-board
+  template:
+    metadata:
+      labels:
+        app: notice-board
+        version: "02230132-1.0.0" # label for E3.1 label selectors
+    spec:
+      containers:
+        - name: api
+          image: notice-board:02230132-1.0.0
+          imagePullPolicy: Never # loaded via kind; never pull from a registry
+          ports:
+            - name: http
+              containerPort: 8080
+          resources:
+            requests:
+              cpu: 100m # 3 pods = 300m, room for rolling surge
+              memory: 64Mi
+            limits:
+              cpu: 300m
+              memory: 128Mi
+          readinessProbe:
+            httpGet:
+              path: /healthz # gate traffic until warm-up completes
+              port: http
+            periodSeconds: 2
+          livenessProbe:
+            httpGet:
+              path: /version # NOT /healthz — 5 s warm-up 503 would kill the pod
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5

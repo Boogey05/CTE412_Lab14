@@ -1,0 +1,7 @@
+FROM python:3.12-alpine
+ARG APP_VERSION=02230129-1.0.0
+WORKDIR /app
+COPY server.py .
+ENV APP_VERSION=${APP_VERSION}
+EXPOSE 8080
+CMD ["python", "server.py"]

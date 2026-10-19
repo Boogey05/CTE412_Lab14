@@ -1,0 +1,15 @@
+# Purpose: hard quota sized for 3 replicas + monitor + rollout surge + blue AND green
+# Apply: kubectl apply -f manifests/base/01-quota.yaml
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: nb-quota
+  namespace: nb-02230132
+spec:
+  hard:
+    requests.cpu: "1" # 6 app pods (600m) + monitor (10m) + surge fits
+    requests.memory: 1Gi
+    limits.cpu: "2"
+    limits.memory: 2Gi
+    pods: "15" # 6 app + monitor + surge + terminating pods
+    count/services: "4" # notice-board, notice-board-ext, notice-board-preview, spare

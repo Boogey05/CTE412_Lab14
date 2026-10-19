@@ -1,0 +1,27 @@
+# Purpose: Recreate-strategy release of 02230132-1.1.0 — measures downtime
+# Apply: kubectl apply -f manifests/rolling/deployment-recreate.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notice-board
+  annotations:
+    kubernetes.io/change-cause: "release 02230132-1.1.0 via Recreate"
+spec:
+  replicas: 2
+  strategy:
+    type: Recreate # all old pods die before any new pod starts
+  selector:
+    matchLabels:
+      app: notice-board
+  template:
+    metadata:
+      labels:
+        app: notice-board
+        version: "02230132-1.1.0"
+    spec:
+      containers:
+        - name: api
+          image: notice-board:02230132-1.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080

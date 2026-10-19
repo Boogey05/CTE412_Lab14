@@ -1,0 +1,56 @@
+# Purpose: green slot — 02230132-1.1.0, reads FEATURE_PINNED from the ConfigMap
+# Apply: kubectl apply -f manifests/bluegreen/green.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notice-board-green
+  namespace: nb-02230132
+  annotations:
+    kubernetes.io/change-cause: "green slot 02230132-1.1.0"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notice-board
+      slot: green
+  template:
+    metadata:
+      labels:
+        app: notice-board
+        slot: green
+        version: "02230132-1.1.0"
+      annotations:
+        configmap/flags-version: "v2" # bump to force green pods to pick up a flag change
+    spec:
+      containers:
+        - name: api
+          image: notice-board:02230132-1.1.0
+          imagePullPolicy: Never
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: FEATURE_PINNED
+              valueFrom:
+                configMapKeyRef:
+                  name: notice-board-flags # env-style: read once at container start
+                  key: FEATURE_PINNED
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 300m
+              memory: 128Mi
+          readinessProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 2
+          livenessProbe:
+            httpGet: { path: /version, port: http }
+            initialDelaySeconds: 10
+            periodSeconds: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0 # zero-failure flag rollout
+      maxSurge: 1

@@ -1,0 +1,31 @@
+# Purpose: RollingUpdate release of 02230132-1.1.0 — zero-downtime, one surge pod
+# Apply: kubectl apply -f manifests/rolling/deployment-rolling.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notice-board
+  annotations:
+    kubernetes.io/change-cause: "release 02230132-1.1.0 via RollingUpdate"
+spec:
+  replicas: 3
+  minReadySeconds: 5 # pod must stay Ready 5 s before counting as available
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0 # never drop below 3 Ready pods
+      maxSurge: 1 # at most one extra pod during the rollout
+  selector:
+    matchLabels:
+      app: notice-board
+  template:
+    metadata:
+      labels:
+        app: notice-board
+        version: "02230132-1.1.0"
+    spec:
+      containers:
+        - name: api
+          image: notice-board:02230132-1.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080

@@ -1,0 +1,14 @@
+# Purpose: kind cluster for CTE412 P06 — 1 control-plane + 2 workers, NodePort 30090 bound to host loopback
+# Apply: kind create cluster --name cte412-02230129 --config cluster/kind-cluster.yaml
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: cte412-02230129
+nodes:
+  - role: control-plane
+    extraPortMappings:
+      - containerPort: 30090 # NodePort inside the kind node
+        hostPort: 30090 # published on the Windows host
+        listenAddress: "127.0.0.1" # loopback only, per brief
+        protocol: TCP
+  - role: worker # notice-board pods
+  - role: worker # pod spread + multi-pod /version responses

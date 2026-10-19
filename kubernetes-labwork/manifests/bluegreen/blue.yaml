@@ -1,0 +1,43 @@
+# Purpose: blue slot — 02230132-1.0.0, same probes/resources as Task 3
+# Apply: kubectl apply -f manifests/bluegreen/blue.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notice-board-blue
+  namespace: nb-02230132
+  annotations:
+    kubernetes.io/change-cause: "blue slot 02230132-1.0.0"
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: notice-board
+      slot: blue # slot label drives the service selector switch
+  template:
+    metadata:
+      labels:
+        app: notice-board
+        slot: blue
+        version: "02230132-1.0.0"
+    spec:
+      containers:
+        - name: api
+          image: notice-board:02230132-1.0.0
+          imagePullPolicy: Never
+          ports:
+            - name: http
+              containerPort: 8080
+          resources:
+            requests:
+              cpu: 100m # 3 blue + 3 green + monitor = 610m < quota 1
+              memory: 64Mi
+            limits:
+              cpu: 300m
+              memory: 128Mi
+          readinessProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 2
+          livenessProbe:
+            httpGet: { path: /version, port: http }
+            initialDelaySeconds: 10
+            periodSeconds: 5

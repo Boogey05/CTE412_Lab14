@@ -1,0 +1,6 @@
+FROM python:3.12-alpine
+WORKDIR /app
+COPY server_broken.py server.py
+ENV APP_VERSION=02230129-1.2.0
+EXPOSE 8080
+CMD ["python", "server.py"]
